@@ -74,9 +74,9 @@ def visualize_graph(match_values_list: List[np.ndarray],
     # fig.update_yaxes(showspikes=True, spikecolor="black", spikethickness=1)
 
     x_axis_ticker_labels = list(range(-window_size, future_size + 1))
-    fig.update_layout(title=f"Similar patters for {anchor_symbol} based on historical market close data",
-                      yaxis=dict(title="Normalized Value"),
-                      xaxis=dict(title="Days",
+    fig.update_layout(title=f"Предполагаемые траектории {anchor_symbol} на основании исторической динамики",
+                      yaxis=dict(title="Нормированные значения"),
+                      xaxis=dict(title="Дни",
                                  tickmode="array",
                                  tickvals=list(range(len(x_axis_ticker_labels))),
                                  ticktext=x_axis_ticker_labels),
