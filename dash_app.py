@@ -11,25 +11,6 @@ app = Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-wi
 app.title = "Stock Patterns"
 server = app.server
 
-##### Header #####
-
-header_div = html.Div([html.Div([html.H3("📈")], className="one-third column"),
-                       html.Div([html.Div([html.H3("Stock Patterns", style={"margin-bottom": "0px"}),
-                                           html.H5("Find historical patterns and use for forecasting",
-                                                   style={"margin-top": "0px"})])],
-                                className="one-half column", id="title"),
-                       html.Div([html.A(html.Button("Gabor Vecsei"), href="https://www.gaborvecsei.com/")],
-                                className="one-third column",
-                                id="learn-more-button")],
-                      id="header", className="row flex-display", style={"margin-bottom": "25px"})
-
-##### Explanation #####
-
-explanation_div = html.Div([dcc.Markdown("""Select a stock symbol and a time-frame. This tools finds similar patterns in
-historical data.
-
-The most similar patters are visualized with an extended *time-frame/'future data'*, which can be an
-indication of future price movement for the selected (anchor) stock.""")])
 
 ##### Settings container #####
 
@@ -60,19 +41,17 @@ MAX_TOP_K_VALUE = 10
 top_k_input = dcc.Input(id=top_k_input_id, type="number", min=0, max=MAX_TOP_K_VALUE, value=5, className="dcc_control")
 
 offset_checkbox_id = "id-offset-checkbox"
-offset_checkbox = dcc.Checklist(id=offset_checkbox_id, options=[{"label": "Use Offset", "value": "offset"}],
+offset_checkbox = dcc.Checklist(id=offset_checkbox_id, options=[{"label": "Использовать смешение", "value": "offset"}],
                                 value=["offset"], className="dcc_control")
 
-settings_div = html.Div([html.P("Symbol (anchor)", className="control_label"),
+settings_div = html.Div([html.P("Акция", className="control_label"),
                          symbol_dropdown,
-                         html.P("Search window size", className="control_label"),
+                         html.P("Размер окна поиска", className="control_label"),
                          window_size_dropdown,
-                         html.P(f"Future window size (max. {MAX_FUTURE_WINDOW_SIZE})", className="control_label"),
+                         html.P(f"Длина прогноза (мах. {MAX_FUTURE_WINDOW_SIZE})", className="control_label"),
                          future_size_input,
-                         html.P(f"Patterns to match (max. {MAX_TOP_K_VALUE})", className="control_label"),
+                         html.P(f"Количество совпдений (мах. {MAX_TOP_K_VALUE})", className="control_label"),
                          top_k_input,
-                         html.P("Offset the matched patterns for easy comparison (to the anchors last market close)",
-                                className="control_label"),
                          offset_checkbox],
                         className="pretty_container three columns",
                         id="id-settings-div")
@@ -101,30 +80,13 @@ matched_div = html.Div([html.Div([html.H6("Matched (most similar) patterns"), ta
                        id="id-matched-list-container",
                        className="eleven columns")
 
-##### Reference Links #####
 
-css_link = html.A("[1] Style of the page (css)",
-                  href="https://github.com/plotly/dash-sample-apps/tree/master/apps/dash-oil-and-gas")
-yahoo_data_link = html.A("[2] Yahoo data", href="https://finance.yahoo.com")
-gabor_github_link = html.A("[3] Gabor Vecsei GitHub", href="https://github.com/gaborvecsei")
-reference_links_div = html.Div([html.Div([html.H6("References"),
-                                          css_link,
-                                          html.Br(),
-                                          yahoo_data_link,
-                                          html.Br(),
-                                          gabor_github_link],
-                                         className="pretty_container")],
-                               className="four columns")
 
 ##### Layout #####
 
-app.layout = html.Div([header_div,
-                       explanation_div,
-                       html.Div([settings_div,
-                                 stats_and_graph_div],
+app.layout = html.Div([html.Div([settings_div,stats_and_graph_div],
                                 className="row flex-display"),
-                       html.Div([matched_div], className="row flex-display"),
-                       reference_links_div],
+                       html.Div([matched_div], className="row flex-display")],
                       id="mainContainer",
                       style={"display": "flex", "flex-direction": "column"})
 
@@ -153,6 +115,7 @@ def update_plot_and_table(symbol_value, window_size_value, future_size_value, to
     for i, match in enumerate(ret.matches):
         values.append(match.values)
         symbols.append(match.symbol)
+        print(match.start_date,match.end_date)
         start_end_dates.append((match.start_date, match.end_date))
         row_values = [i + 1,
                       match.distance,

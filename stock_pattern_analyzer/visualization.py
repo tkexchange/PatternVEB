@@ -26,7 +26,7 @@ def visualize_graph(match_values_list: List[np.ndarray],
 
     fig = graph_objs.Figure()
 
-    assert len(match_values_list) == len(match_symbols), "Something is fishy"
+    assert len(match_values_list) == len(match_symbols), "Error"
 
     # Draw all matches
     for i in range(nb_matches):
@@ -43,31 +43,28 @@ def visualize_graph(match_values_list: List[np.ndarray],
         trace_name = f"{i}) {match_symbol} ({match_start_date} - {match_end_date})"
         trace = graph_objs.Scatter(x=x,
                                    y=minmax_matched_values,
-                                   name=trace_name,
                                    meta=trace_name,
                                    mode="lines",
                                    line=dict(color=VALUES_COLOR),
                                    opacity=opacity_values[i],
-                                   customdata=original_values,
-                                   hovertemplate="<b>%{meta}</b><br>Norm. val.: %{y:.2f}<br>Value: %{customdata:.2f}$<extra></extra>")
+                                   customdata=original_values)
         fig.add_trace(trace)
 
     # Draw the anchor series
     x = list(range(1, len(anchor_values) + 1))
-    trace_name = f"Anchor ({anchor_symbol})"
+    trace_name = f"({anchor_symbol})"
     trace = graph_objs.Scatter(x=x,
                                y=minmax_anchor_values,
                                name=trace_name,
                                meta=trace_name,
                                mode="lines+markers",
                                line=dict(color=ANCHOR_COLOR),
-                               customdata=anchor_original_values,
-                               hovertemplate="<b>%{meta}</b><br>Norm. val.: %{y:.2f}<br>Value: %{customdata:.2f}$<extra></extra>")
+                               customdata=anchor_original_values)
     fig.add_trace(trace)
 
     # Add "last market close" line
     fig.add_vline(x=window_size, line_dash="dash", line_color="black",
-                  annotation_text="Last market close (for selected symbol)")
+                  annotation_text="Последняя цена закрытия")
 
     # Style the figure
     fig.update_xaxes(showspikes=True, spikecolor="black", spikesnap="cursor", spikemode="across")
@@ -76,7 +73,7 @@ def visualize_graph(match_values_list: List[np.ndarray],
     x_axis_ticker_labels = list(range(-window_size, future_size + 1))
     fig.update_layout(title=f"Предполагаемые траектории {anchor_symbol} на основании исторической динамики",
                       yaxis=dict(title="Нормированные значения"),
-                      xaxis=dict(title="Дни",
+                      xaxis=dict(title="superCandels algopack",
                                  tickmode="array",
                                  tickvals=list(range(len(x_axis_ticker_labels))),
                                  ticktext=x_axis_ticker_labels),

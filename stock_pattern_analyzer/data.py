@@ -9,6 +9,82 @@ import pandas as pd
 import yfinance
 from tqdm import tqdm
 
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+import pandas as pd
+import time
+import requests as re
+
+"""////"""
+tradeStatsColumn = [
+    'tradedate','tradetime','secid','pr_open','pr_high','pr_low', \
+    'pr_close','pr_std','vol','val','trades','pr_vwap','pr_change', \
+    'trades_b','trades_s','val_b','val_s','vol_b','vol_s','disb', \
+    'pr_vwap_b','pr_vwap_s','SYSTIME' \
+]
+
+def getSuperCandles(ticker,start_data,end_data,pandas_data=True):
+    null = None
+    tradeStatsUrl = f'https://iss.moex.com/iss/datashop/algopack/eq/tradestats/{ticker}.json?from={start_data}&till={end_data}'
+    responseTradeStats = eval(re.get(tradeStatsUrl).text)
+    result = dict()
+    result['tradeStats'] = dict()
+    for data in responseTradeStats['data']['data']:
+        result['tradeStats'][data[0]+' '+data[1]] = [data[i] for i in range(3,len(data)-1)]
+    timeKeys = []
+    for key in result.keys():
+        timeKeys = timeKeys + list(result[key].keys())
+    timeKeys = list(set(timeKeys))
+    timeKeys.sort()
+    resultData = []
+    for key in timeKeys:
+        try:
+            tradeStats = result['tradeStats'][key]
+        except:
+            tradeStats = [None for i in range(3,len(tradeStatsColumn)-1)]
+        data = list()
+        data = [key,ticker] + tradeStats
+        resultData.append(data)
+    ts = [tradeStatsColumn[i] for i in range(3,len(tradeStatsColumn)-1)]
+    columns = ['Date','symbol'] + ts
+    if pandas_data:
+        df = pd.DataFrame(resultData,columns=columns)
+        df = df.set_index('Date')
+        df.index = pd.to_datetime(df.index)
+        return  df , columns
+    else:
+        return resultData , columns
+    
+def getRangeSuperCandles(ticker,minData):
+    delta = timedelta(days=7)
+    delta2 = timedelta(days=1)
+    current_dateTime = datetime.now()
+    first_data = current_dateTime - delta
+    superCandlesBach = []
+    while first_data > minData:
+        start_data_str = first_data.strftime('%Y-%m-%d')
+        end_data_str = current_dateTime.strftime('%Y-%m-%d')
+        newSuperCandles , _ = getSuperCandles(ticker,start_data_str,end_data_str)
+        superCandlesBach.append(newSuperCandles)
+        current_dateTime = current_dateTime - delta
+        first_data = current_dateTime - delta
+        current_dateTime = current_dateTime - delta2
+        time.sleep(1)
+    superCandlesBach.reverse()
+    superCandles = pd.concat(superCandlesBach)
+    return superCandles
+
+def getHistory(ticker):
+    delta = timedelta(days=14)
+    minData = datetime.now() - delta
+    df = getRangeSuperCandles('SBER',minData)
+    df = df.rename(columns={"pr_open": "Open", "pr_high": "High","pr_low":"Low","pr_close":"Close","vol":"Volume"})
+    df = df.iloc[::-1]
+    df["Dividends"] = [0 for i in range(len(df))]
+    df["Stock Splits"] = [0 for i in range(len(df))]
+    return df[["Open","High","Low","Close","Volume","Dividends","Stock Splits"]]
+
 
 class RawStockDataHolder:
     def __init__(self, ticker_symbols: list, period_years: int = 5, interval: int = 1):
@@ -32,7 +108,7 @@ class RawStockDataHolder:
         ticker = yfinance.Ticker(symbol)
         period_str = f"{self.period_years}y"
         interval_str = f"{self.interval}d"
-        ticker_df = ticker.history(period=period_str, interval=interval_str, rounding=True)[::-1]
+        ticker_df = getHistory(ticker)
         if ticker_df.empty or len(ticker_df) == 0:
             raise ValueError(f"{symbol} does not have enough data")
         return ticker_df

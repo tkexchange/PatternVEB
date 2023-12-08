@@ -32,18 +32,15 @@ def get_sp500_ticker_list() -> set:
 AVAILABLE_SEARCH_WINDOW_SIZES = list(range(6, 17, 2)) + [5, 20, 25, 30, 45]
 AVAILABLE_SEARCH_WINDOW_SIZES = sorted(AVAILABLE_SEARCH_WINDOW_SIZES)
 
-SYMBOL_LIST = get_sp500_ticker_list()
-user_defined_tickers_file_path = Path("symbols.txt")
-if user_defined_tickers_file_path.exists():
-    user_defined_tickers = set(user_defined_tickers_file_path.read_text().split("\n"))
-    SYMBOL_LIST = SYMBOL_LIST.union(user_defined_tickers)
-SYMBOL_LIST = sorted(SYMBOL_LIST)
 
+SYMBOL_LIST = [
+    'SBER','GAZP','ALRS','GMKN','LKOH'
+]
 PERIOD_YEARS = 2
 
 
 def _date_to_str(date):
-    return pd.to_datetime(date).strftime("%Y-%m-%d")
+    return pd.to_datetime(date).strftime("%Y-%m-%d %H-%M-%S")
 
 
 def _find_and_remove_files(folder_path: str, file_pattern: str) -> list:
@@ -171,6 +168,7 @@ async def search_most_recent(symbol: str, window_size: int = 5, top_k: int = 5, 
     matches = []
 
     for index, distance in zip(top_k_indices, top_k_distances):
+        print(index)
         ticker = search_tree.get_window_symbol(index)
         start_date, end_date = search_tree.get_start_end_date(index)
 
