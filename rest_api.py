@@ -168,7 +168,6 @@ async def search_most_recent(symbol: str, window_size: int = 5, top_k: int = 5, 
     matches = []
 
     for index, distance in zip(top_k_indices, top_k_distances):
-        print(index)
         ticker = search_tree.get_window_symbol(index)
         start_date, end_date = search_tree.get_start_end_date(index)
 

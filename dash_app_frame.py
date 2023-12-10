@@ -25,7 +25,7 @@ symbol_dropdown = dcc.Dropdown(id=symbol_dropdown_id,
 window_size_dropdown_id = "id-window-size-dropdown"
 window_sizes = get_search_window_sizes()
 window_size_dropdown = dcc.Dropdown(id=window_size_dropdown_id,
-                                    options=[{"label": f"{x} days", "value": x} for x in window_sizes],
+                                    options=[{"label": f"{x} баров", "value": x} for x in window_sizes],
                                     multi=False,
                                     value=window_sizes[2],
                                     className="dcc_control")

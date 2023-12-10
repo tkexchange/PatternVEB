@@ -63,38 +63,17 @@ stats_and_graph_div = html.Div([html.Div(id="id-stats-container", className="row
                                 html.Div([dcc.Graph(id=graph_id)], id="id-graph-div", className="pretty_container")],
                                id="id-graph-container", className="nine columns")
 
-##### Matched Stocks List #####
-
-matched_table_id = "id-matched-list"
-table_columns = ["Index",
-                 "Match distance",
-                 "Symbol",
-                 "Pattern Start Date",
-                 "Pattern End Date",
-                 "Pattern Start Close Value ($)",
-                 "Pattern End Close Value ($)",
-                 "Pattern Future Close Value ($)"]
-table = dash_table.DataTable(id=matched_table_id, columns=[{"id": c, "name": c} for c in table_columns], page_size=5)
-matched_div = html.Div([html.Div([html.H6("Matched (most similar) patterns"), table],
-                                 className="pretty_container")],
-                       id="id-matched-list-container",
-                       className="eleven columns")
-
-
-
 ##### Layout #####
 
 app.layout = html.Div([html.Div([settings_div,stats_and_graph_div],
-                                className="row flex-display"),
-                       html.Div([matched_div], className="row flex-display")],
+                                className="row flex-display")],
                       id="mainContainer",
                       style={"display": "flex", "flex-direction": "column"})
 
 
 ##### Callbacks #####
 
-@app.callback([Output(graph_id, "figure"),
-               Output(matched_table_id, "data")],
+@app.callback([Output(graph_id, "figure")],
               [Input(symbol_dropdown_id, "value"),
                Input(window_size_dropdown_id, "value"),
                Input(future_size_input_id, "value"),
@@ -125,7 +104,7 @@ def update_plot_and_table(symbol_value, window_size_value, future_size_value, to
                       match.values[-1],
                       match.values[window_size_value - 1],
                       match.values[0]]
-        row_dict = {c: v for c, v in zip(table_columns, row_values)}
+        row_dict = {}
         table_rows.append(row_dict)
 
     offset_traces = False if len(checkbox_value) == 0 else True
@@ -141,7 +120,7 @@ def update_plot_and_table(symbol_value, window_size_value, future_size_value, to
                               show_legend=False,
                               offset_traces=offset_traces)
 
-    return fig, table_rows
+    return [fig]
 
 
 if __name__ == "__main__":
